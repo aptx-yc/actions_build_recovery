@@ -1,4 +1,4 @@
-name: rec-building
+name: rec-building-twrp
 
 on:
   watch:
@@ -32,20 +32,20 @@ jobs:
       
     - name: Get variables
       run: |
-        echo "::set-output name=twrp_url::$(jq -r '.twrp_url' config.json)"
-        echo "::set-output name=twrp_branch::$(jq -r '.twrp_branch' config.json)"
-        echo "::set-output name=git_username::$(jq -r '.git_username' config.json)"
-        echo "::set-output name=git_email::$(jq -r '.git_email' config.json)"
-        echo "::set-output name=use_own_dt::$(jq -r '.use_own_dt' config.json)"
-        echo "::set-output name=dt_url::$(jq -r '.dt_url' config.json)"
-        echo "::set-output name=dt_remote::$(jq -r '.dt_remote' config.json)"
-        echo "::set-output name=dt_branch::$(jq -r '.dt_branch' config.json)"
-        echo "::set-output name=dt_path::$(jq -r '.dt_path' config.json)"
-        echo "::set-output name=device_code::$(jq -r '.device_code' config.json)"
-        echo "::set-output name=fix_product::$(jq -r '.fix_product' config.json)"
-        echo "::set-output name=fix_misscom::$(jq -r '.fix_misscom' config.json)"
-        echo "::set-output name=fix_busybox::$(jq -r '.fix_busybox' config.json)"
-        echo "::set-output name=fix_branch::$(jq -r '.fix_branch' config.json)"
+        echo "::set-output name=twrp_url::$(jq -r '.twrp_url' config-twrp.json)"
+        echo "::set-output name=twrp_branch::$(jq -r '.twrp_branch' config-twrp.json)"
+        echo "::set-output name=git_username::$(jq -r '.git_username' config-twrp.json)"
+        echo "::set-output name=git_email::$(jq -r '.git_email' config-twrp.json)"
+        echo "::set-output name=use_own_dt::$(jq -r '.use_own_dt' config-twrp.json)"
+        echo "::set-output name=dt_url::$(jq -r '.dt_url' config-twrp.json)"
+        echo "::set-output name=dt_remote::$(jq -r '.dt_remote' config-twrp.json)"
+        echo "::set-output name=dt_branch::$(jq -r '.dt_branch' config-twrp.json)"
+        echo "::set-output name=dt_path::$(jq -r '.dt_path' config-twrp.json)"
+        echo "::set-output name=device_code::$(jq -r '.device_code' config-twrp.json)"
+        echo "::set-output name=fix_product::$(jq -r '.fix_product' config-twrp.json)"
+        echo "::set-output name=fix_misscom::$(jq -r '.fix_misscom' config-twrp.json)"
+        echo "::set-output name=fix_busybox::$(jq -r '.fix_busybox' config-twrp.json)"
+        echo "::set-output name=fix_branch::$(jq -r '.fix_branch' config-twrp.json)"
         echo "::set-output name=date::$(date +%F)"
       id: var
       
@@ -118,6 +118,6 @@ jobs:
         files: workspace/out/target/product/${{ steps.var.outputs.device_code }}/recovery.img
         name: ${{ steps.var.outputs.date }} ${{ steps.var.outputs.device_code }} by ${{ steps.var.outputs.git_username }}
         tag_name: ${{ github.run_id }}
-        body: Android Third-Party Recovery built by ${{ steps.var.outputs.git_username }}
+        body: TeamWin Recovery Project built by ${{ steps.var.outputs.git_username }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.TWRP }}
