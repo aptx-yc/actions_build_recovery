@@ -48,6 +48,7 @@ jobs:
         echo "::set-output name=fix_busybox::$(jq -r '.fix_busybox' config-twrp.json)"
         echo "::set-output name=fix_branch::$(jq -r '.fix_branch' config-twrp.json)"
         echo "::set-output name=date::$(date +%F)"
+        echo "::set-output name=day::$(date +%Y%m%d)"
       id: var
       
     - name: Install Repo
@@ -112,11 +113,12 @@ jobs:
         source build/envsetup.sh
         lunch omni_${{ steps.var.outputs.device_code }}-eng 
         mka recoveryimage -j$(nproc --all)
+        mv out/target/product/${{ steps.var.outputs.device_code }}/recovery.img out/target/product/${{ steps.var.outputs.device_code }}/TWRP-3.4.0_${{ steps.var.outputs.device_code }}-${{ steps.var.outputs.day }}.img
         
     - name: Upload REC
       uses: softprops/action-gh-release@v1
       with:
-        files: workspace/out/target/product/${{ steps.var.outputs.device_code }}/recovery.img
+        files: workspace/out/target/product/${{ steps.var.outputs.device_code }}/TWRP-3.4.0_${{ steps.var.outputs.device_code }}-${{ steps.var.outputs.day }}.img
         name: ${{ steps.var.outputs.date }} ${{ steps.var.outputs.device_code }} by ${{ steps.var.outputs.git_username }}
         tag_name: ${{ github.run_id }}
         body: TeamWin Recovery Project built by ${{ steps.var.outputs.git_username }}
