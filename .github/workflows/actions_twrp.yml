@@ -3,7 +3,32 @@ name: rec-building-twrp
 on:
   watch:
     types: [started]
-  workflow_dispatch:
+    workflow_dispatch:
+     inputs:
+       twrp_branch:
+         description: 'twrp_branch'
+         required: true
+         default: 'twrp-9.0'
+       device_code:
+         description: 'device_code'
+         required: true
+         default: 'tiffany'
+       dt_remote:
+         description: 'dt_remote(github or gitlab)'
+         required: true
+         default: 'github'
+       dt_url:
+         description: 'dt_url'
+         required: true
+         default: 'laityts/android_device_xiaomi_tiffany-twrp'
+       dt_branch:
+         description: 'dt_branch'
+         required: true
+         default: 'android-9.0'
+       dt_path:
+         description: 'dt_path'
+         required: true
+         default: 'device/xiaomi/tiffany'
     
 jobs:
   build:
@@ -33,16 +58,40 @@ jobs:
       
     - name: Get variables
       run: |
+        if [[ -z "${{ github.event.inputs.twrp_branch }}" ]]; then
+            echo "::set-output name=twrp_branch::$(jq -r '.twrp_branch' config.json)"
+        else
+            echo "::set-output name=twrp_branch::${{ github.event.inputs.twrp_branch }}"
+        fi
+        if [[ -z "${{ github.event.inputs.dt_url }}" ]]; then
+            echo "::set-output name=dt_url::$(jq -r '.dt_url' config.json)"
+        else
+            echo "::set-output name=dt_url::${{ github.event.inputs.dt_url }}"
+        fi
+        if [[ -z "${{ github.event.inputs.dt_remote }}" ]]; then
+            echo "::set-output name=dt_remote::$(jq -r '.dt_remote' config.json)"
+        else
+            echo "::set-output name=dt_remote::${{ github.event.inputs.dt_remote }}"
+        fi
+        if [[ -z "${{ github.event.inputs.dt_branch }}" ]]; then
+            echo "::set-output name=dt_branch::$(jq -r '.dt_branch' config.json)"
+        else
+            echo "::set-output name=dt_branch::${{ github.event.inputs.dt_branch }}"
+        fi
+        if [[ -z "${{ github.event.inputs.dt_path }}" ]]; then
+            echo "::set-output name=dt_path::$(jq -r '.dt_path' config.json)"
+        else
+            echo "::set-output name=dt_path::${{ github.event.inputs.dt_path }}"
+        fi
+        if [[ -z "${{ github.event.inputs.device_code }}" ]]; then
+            echo "::set-output name=device_code::$(jq -r '.device_code' config.json)"
+        else
+            echo "::set-output name=device_code::${{ github.event.inputs.device_code }}"
+        fi
         echo "::set-output name=twrp_url::$(jq -r '.twrp_url' config-twrp.json)"
-        echo "::set-output name=twrp_branch::$(jq -r '.twrp_branch' config-twrp.json)"
         echo "::set-output name=git_username::$(jq -r '.git_username' config-twrp.json)"
         echo "::set-output name=git_email::$(jq -r '.git_email' config-twrp.json)"
         echo "::set-output name=use_own_dt::$(jq -r '.use_own_dt' config-twrp.json)"
-        echo "::set-output name=dt_url::$(jq -r '.dt_url' config-twrp.json)"
-        echo "::set-output name=dt_remote::$(jq -r '.dt_remote' config-twrp.json)"
-        echo "::set-output name=dt_branch::$(jq -r '.dt_branch' config-twrp.json)"
-        echo "::set-output name=dt_path::$(jq -r '.dt_path' config-twrp.json)"
-        echo "::set-output name=device_code::$(jq -r '.device_code' config-twrp.json)"
         echo "::set-output name=fix_product::$(jq -r '.fix_product' config-twrp.json)"
         echo "::set-output name=fix_misscom::$(jq -r '.fix_misscom' config-twrp.json)"
         echo "::set-output name=fix_busybox::$(jq -r '.fix_busybox' config-twrp.json)"
@@ -122,5 +171,6 @@ jobs:
         name: ${{ steps.var.outputs.date }} ${{ steps.var.outputs.device_code }} by ${{ steps.var.outputs.git_username }}
         tag_name: ${{ github.run_id }}
         body: TeamWin Recovery Project built by ${{ steps.var.outputs.git_username }}
+        body_path: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
       env:
         GITHUB_TOKEN: ${{ secrets.TWRP }}
