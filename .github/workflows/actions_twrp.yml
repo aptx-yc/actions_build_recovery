@@ -3,33 +3,36 @@ name: rec-building-twrp
 on:
   watch:
     types: [started]
-    workflow_dispatch:
-     inputs:
-       twrp_branch:
-         description: 'twrp_branch'
-         required: true
-         default: 'twrp-9.0'
-       device_code:
-         description: 'device_code'
-         required: true
-         default: 'tiffany'
-       dt_remote:
-         description: 'dt_remote(github or gitlab)'
-         required: true
-         default: 'github'
-       dt_url:
-         description: 'dt_url'
-         required: true
-         default: 'laityts/android_device_xiaomi_tiffany-twrp'
-       dt_branch:
-         description: 'dt_branch'
-         required: true
-         default: 'android-9.0'
-       dt_path:
-         description: 'dt_path'
-         required: true
-         default: 'device/xiaomi/tiffany'
-    
+  workflow_dispatch:
+   inputs:
+     twrp_branch:
+       description: 'twrp_branch'
+       required: true
+       default: 'twrp-9.0'
+     device_code:
+       description: 'device_code'
+       required: true
+       default: 'tiffany'
+     dt_remote:
+       description: 'dt_remote(github or gitlab)'
+       required: true
+       default: 'github'
+     dt_url:
+       description: 'dt_url'
+       required: true
+       default: 'laityts/android_device_xiaomi_tiffany-twrp'
+     dt_branch:
+       description: 'dt_branch'
+       required: true
+       default: 'android-9.0'
+     dt_path:
+       description: 'dt_path'
+       required: true
+       default: 'device/xiaomi/tiffany'
+     twrp_ver:
+       description: 'version'
+       required: true
+       default: '1'
 jobs:
   build:
     if: github.event.repository.owner.id == github.event.sender.id
@@ -153,7 +156,8 @@ jobs:
         sed -i 's!device_code!${{ steps.var.outputs.device_code }}!g' ${{ steps.pwd.outputs.pwd }}/../build/core/${{ steps.var.outputs.fix_branch }}/product_config.mk
         cp ${{ steps.pwd.outputs.pwd }}/../build/core/${{ steps.var.outputs.fix_branch }}/product_config.mk ${{ steps.pwd.outputs.pwd }}/build/core/product_config.mk
         
-    - name: Start Building
+    - id: build
+      name: Start Building
       run: |
         PATH=~/bin:$PATH
         cd ${{ steps.pwd.outputs.pwd }}
@@ -163,17 +167,17 @@ jobs:
         lunch omni_${{ steps.var.outputs.device_code }}-eng 
         mka recoveryimage -j$(nproc --all)
         ls -al
-        TWRP_VERSION := $(cat bootable/recovery/variables.h | grep TW_MAIN_VERSION_STR | cut -d\" -s -f2)
-        mv out/target/product/${{ steps.var.outputs.device_code }}/recovery.img out/target/product/${{ steps.var.outputs.device_code }}/TWRP-${TWRP_VERSION}_${{ steps.var.outputs.device_code }}-${{ steps.var.outputs.day }}.img
-        TeamWin Recovery Project built by ${{ steps.var.outputs.git_username }}  >>Release.txt
-        https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} >>Release.txt
+        TWRP_VERSION=$(cat bootable/recovery/variables.h | grep TW_MAIN_VERSION_STR | cut -d\" -s -f2)
+        echo "TWRP_VERSION: $TWRP_VERSION"
+        mv out/target/product/${{ steps.var.outputs.device_code }}/recovery.img out/target/product/${{ steps.var.outputs.device_code }}/TWRP-${TWRP_VERSION}-${{ github.event.inputs.twrp_ver }}_${{ steps.var.outputs.device_code }}-${{ steps.var.outputs.day }}.img
+        echo "::set-output name=TWRP_VERSION::${TWRP_VERSION}"
         
     - name: Upload REC
       uses: softprops/action-gh-release@v1
       with:
-        files: workspace/out/target/product/${{ steps.var.outputs.device_code }}/TWRP-3.4.0_${{ steps.var.outputs.device_code }}-${{ steps.var.outputs.day }}.img
-        name: ${{ steps.var.outputs.date }} ${{ steps.var.outputs.device_code }} by ${{ steps.var.outputs.git_username }}
+        files: workspace/out/target/product/${{ steps.var.outputs.device_code }}/TWRP-${{ steps.build.outputs.TWRP_VERSION }}-${{ github.event.inputs.twrp_ver }}_${{ steps.var.outputs.device_code }}-${{ steps.var.outputs.day }}.img
+        name: TWRP ${{ steps.build.outputs.TWRP_VERSION }} ${{ steps.var.outputs.device_code }} ${{ steps.var.outputs.day }}
         tag_name: ${{ github.run_id }}
-        body_path: Release.txt
+        body: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
       env:
         GITHUB_TOKEN: ${{ secrets.TWRP }}
