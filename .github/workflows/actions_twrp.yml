@@ -162,7 +162,11 @@ jobs:
         source build/envsetup.sh
         lunch omni_${{ steps.var.outputs.device_code }}-eng 
         mka recoveryimage -j$(nproc --all)
-        mv out/target/product/${{ steps.var.outputs.device_code }}/recovery.img out/target/product/${{ steps.var.outputs.device_code }}/TWRP-3.4.0_${{ steps.var.outputs.device_code }}-${{ steps.var.outputs.day }}.img
+        ls -al
+        TWRP_VERSION := $(cat bootable/recovery/variables.h | grep TW_MAIN_VERSION_STR | cut -d\" -s -f2)
+        mv out/target/product/${{ steps.var.outputs.device_code }}/recovery.img out/target/product/${{ steps.var.outputs.device_code }}/TWRP-${TWRP_VERSION}_${{ steps.var.outputs.device_code }}-${{ steps.var.outputs.day }}.img
+        TeamWin Recovery Project built by ${{ steps.var.outputs.git_username }}  >>Release.txt
+        https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} >>Release.txt
         
     - name: Upload REC
       uses: softprops/action-gh-release@v1
@@ -170,7 +174,6 @@ jobs:
         files: workspace/out/target/product/${{ steps.var.outputs.device_code }}/TWRP-3.4.0_${{ steps.var.outputs.device_code }}-${{ steps.var.outputs.day }}.img
         name: ${{ steps.var.outputs.date }} ${{ steps.var.outputs.device_code }} by ${{ steps.var.outputs.git_username }}
         tag_name: ${{ github.run_id }}
-        body: TeamWin Recovery Project built by ${{ steps.var.outputs.git_username }}
-        body_path: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        body_path: Release.txt
       env:
         GITHUB_TOKEN: ${{ secrets.TWRP }}
